@@ -11,6 +11,8 @@ module Data.Vec
   , append
   , concat
   , interleave
+  , interleave'
+  , reverse
   , transpose
   , zipWith
   , zip
@@ -21,14 +23,15 @@ module Data.Vec
 import Control.Applicative
 import Data.Foldable hiding (concat)
 import Data.Traversable
-import Prelude hiding (foldr,head,tail,last,init,length,map,concat,zip,zipWith,take)
+import Prelude hiding (foldr,head,tail,last,init,length,map,concat,
+                       reverse,zip,zipWith,take)
 
 -- Type-level natural numbers with addition and multiplication
 data Z
 data S n
 
-type One = S Z
-type Two = S One
+type OneT = S Z
+type TwoT = S OneT
 
 type family a :+: b
 type instance Z   :+: n = n
@@ -133,15 +136,33 @@ append :: Vec m a -> Vec n a -> Vec (m :+: n) a
 append Nil       ys = ys
 append (x :< xs) ys = x :< append xs ys
 
-interleave :: Vec n a -> Vec n a -> Vec (n :*: Two) a
-interleave Nil       Nil       = Nil
-interleave (x :< xs) (y :< ys) = x :< y :< interleave xs ys
+-- The :!: type operator is nearly the same as :+: except that the m and n
+-- type parameters are flipped in the recursive case of the type family
+-- instance, just like the parameters are flipped in the recursive case of
+-- the interleave function.  I'm forced to define another type family matching
+-- this recursion scheme rather than just using :+: because apparently, there
+-- is no way to tell GHC that :+: is indeed commutative.
+type family m :!: n
+type instance Z   :!: n = n
+type instance S m :!: n = S (n :!: m)	-- We flip m and n
 
-{-
-interleave2 :: Vec m a -> Vec n a -> Vec (m :+: n) a
-interleave2 Nil       ys = ys
-interleave2 (x :< xs) ys = x :< interleave2 ys xs
--}
+interleave :: Vec m a -> Vec n a -> Vec (m :!: n) a
+interleave Nil       ys = ys
+interleave (x :< xs) ys = x :< interleave ys xs
+
+-- We use a similar trick to be able to define reverse.
+type family Rev n
+type instance Rev Z     = Z
+type instance Rev (S n) = n :+: OneT
+
+reverse :: Vec n a -> Vec (Rev n) a
+reverse Nil       = Nil
+reverse (x :< xs) = append xs (x :< Nil)
+
+-- Interleave two vectors of the same length.
+interleave' :: Vec n a -> Vec n a -> Vec (n :*: TwoT) a
+interleave' Nil       Nil       = Nil
+interleave' (x :< xs) (y :< ys) = x :< y :< interleave' xs ys
 
 transpose :: IsNat n => Vec m (Vec n a) -> Vec n (Vec m a)
 transpose = sequenceA
