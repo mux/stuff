@@ -150,14 +150,17 @@ interleave :: Vec m a -> Vec n a -> Vec (m :!: n) a
 interleave Nil       ys = ys
 interleave (x :< xs) ys = x :< interleave ys xs
 
--- We use a similar trick to be able to define reverse.
-type family Rev n
-type instance Rev Z     = Z
-type instance Rev (S n) = n :+: OneT
+-- A third way to define addition at the type-level, which matches the way
+-- we recurse in a reverse function using an accumulating parameter.
+type family m :^: n
+type instance Z   :^: n = n
+type instance S m :^: n = m :^: S n
 
-reverse :: Vec n a -> Vec (Rev n) a
-reverse Nil       = Nil
-reverse (x :< xs) = append xs (x :< Nil)
+reverse :: Vec n a -> Vec (n :^: Z) a
+reverse as = go as Nil
+  where go :: Vec m a -> Vec n a -> Vec (m :^: n) a
+        go Nil       ys = ys
+        go (x :< xs) ys = go xs (x :< ys)
 
 -- Interleave two vectors of the same length.
 interleave' :: Vec n a -> Vec n a -> Vec (n :*: TwoT) a
