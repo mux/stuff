@@ -190,6 +190,6 @@ Nil       !? _ = Nothing
 (x :< _)  !? 0 = Just x
 (_ :< xs) !? n = xs !? (n - 1)
 
-take :: Fin m n -> Vec n a -> Vec m a
+take :: Fin m (S n) -> Vec n a -> Vec m a
 take FZero _             = Nil
 take (FSucc n) (x :< xs) = x :< take n xs
