@@ -1,4 +1,4 @@
-{-# LANGUAGE GADTs, FlexibleContexts, TypeOperators, TypeFamilies, UndecidableInstances, ScopedTypeVariables #-}
+{-# LANGUAGE GADTs, TypeOperators, TypeFamilies, UndecidableInstances #-}
 module Data.Vec
   ( Vec(..)
   , Fin(..)
@@ -106,9 +106,6 @@ Nil       `applyV` Nil       = Nil
 joinV :: Vec n (Vec n a) -> Vec n a
 joinV Nil       = Nil
 joinV (x :< xs) = head x :< joinV (tail <$> xs)
-
-natToInt :: forall n. IsNat n => n -> Int
-natToInt = const $ length (units :: Vec n ())
 
 -- Exported functions.
 
