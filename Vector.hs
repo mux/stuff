@@ -19,13 +19,14 @@ module Data.Vec
   , (!)
   , (!?)
   , take
+  , drop
   ) where
 
 import Control.Applicative
 import Data.Foldable hiding (concat)
 import Data.Traversable
 import Prelude hiding (foldr,head,tail,last,init,length,map,concat,
-                       reverse,zip,zipWith,take)
+                       reverse,zip,zipWith,take,drop)
 
 -- Type-level natural numbers with addition and multiplication
 data Z
@@ -193,3 +194,11 @@ Nil       !? _ = Nothing
 take :: Fin m (S n) -> Vec n a -> Vec m a
 take FZero _             = Nil
 take (FSucc n) (x :< xs) = x :< take n xs
+
+type family m :-: n
+type instance m   :-: Z   = m
+type instance S m :-: S n = m :-: n
+
+drop :: Fin m (S n) -> Vec n a -> Vec (n :-: m) a
+drop FZero     xs        = xs
+drop (FSucc n) (_ :< xs) = drop n xs
