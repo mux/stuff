@@ -18,6 +18,7 @@ module Data.Vec
   , zip
   , (!)
   , (!?)
+  , take
   ) where
 
 import Control.Applicative
@@ -56,9 +57,9 @@ data Vec n a where
   Nil  :: Vec Z a
   (:<) :: a -> Vec n a -> Vec (S n) a
 
-data Fin n where
-  FZero :: Fin (S n)
-  FSucc :: Fin n -> Fin (S n)
+data Fin m n where
+  FZero :: Fin Z (S n)
+  FSucc :: Fin m n -> Fin (S m) (S n)
 
 instance Eq a => Eq (Vec n a) where
   Nil       == Nil       = True
@@ -180,7 +181,7 @@ zipWith f xs ys = f <$> xs <*> ys
 zip :: IsNat n => Vec n a -> Vec n b -> Vec n (a,b)
 zip = zipWith (,)
 
-(!) :: Vec n a -> Fin n -> a
+(!) :: Vec n a -> Fin m n -> a
 (x :< _)  ! FZero   = x
 (_ :< xs) ! FSucc n = xs ! n
 
@@ -189,8 +190,6 @@ Nil       !? _ = Nothing
 (x :< _)  !? 0 = Just x
 (_ :< xs) !? n = xs !? (n - 1)
 
-{-
-take :: Fin (S n) -> Vec n a -> Vec n a
-take FZero     _         = Nil
+take :: Fin m n -> Vec n a -> Vec m a
+take FZero _             = Nil
 take (FSucc n) (x :< xs) = x :< take n xs
--}
