@@ -2,6 +2,14 @@
 # vi:ts=4:sw=4:et
 
 # Mass phone numbers updater for Google contacts.
+#
+# Example usage:
+#
+# ./gpu.py -u <user> -p <password> -s '-' '' -s ' ' '' -s '^0(\d{9})$' '+33\1'
+#
+# This would strip spaces and '-' characters, and format 10-digit phone
+# numbers starting with a 0 (supposedly french ones) to use the international
+# +33 ... notation (useful when you're traveling).
 
 from __future__ import print_function
 from __future__ import unicode_literals
