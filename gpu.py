@@ -102,7 +102,6 @@ for contact in get_all_contacts(client):
         if key == 'a':
             args.yes = True
 
-    success = False
     # We should handle Etags mismatch here, but since this is intended to
     # be used as an interactive application, it doesn't really matter.
     client.Update(contact)
