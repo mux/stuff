@@ -88,9 +88,17 @@ client.ClientLogin(args.user, args.password, client.source)
 
 for contact in get_all_contacts(client):
     if contact.name is None:
-        name = '(none)'
+        name = '(no name)'
     else:
         name = contact.name.full_name.text
+
+    if not args.sub:
+        if contact.phone_number:
+            print('{0} :'.format(name))
+            for phone in contact.phone_number:
+                phone_type = phone_types.get(phone.rel, 'unknown')
+                print('  {0} ({1})'.format(phone.text, phone_type))
+        continue
 
     updates = update_contact(contact, args.sub)
     if not updates:
